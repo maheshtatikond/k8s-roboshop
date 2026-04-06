@@ -1,0 +1,51 @@
+apiversion : app/v1
+kind : Deployment
+metadata:
+  name : mongodb
+  namespace : roboshop
+#these labels are replicaset labels.
+  labels:
+    project : roboshop
+    tier : db
+    component : mongodb
+
+spec:
+  replicas : 1
+  selector:
+#these labels are replicaset select the pod
+    matchLabels:
+      project : roboshop
+      tier : db
+      component : mongodb
+#this is pod definition,pod is subset of replicaset
+  template:
+    metadata:
+      labels:
+        project : roboshop
+        tier : db
+        component : mongodb 
+
+    spec:
+      containers:
+      - name : mongodb
+        image : mahesh6419/mongodb:1.0.0 
+---
+apiversion : v1
+kind : Service
+namespace : roboshop
+metadata:
+  name : mongodb
+  labels:
+    project : roboshop
+    tier : db
+    component : mongodb  
+spec:
+  selector:
+    project : roboshop
+    tier : db
+    component : mongodb
+  ports:
+  - protocol : TCP
+    port : 80 #service port
+    targetPort : 27017  #container port
+    
