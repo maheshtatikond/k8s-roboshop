@@ -1,4 +1,4 @@
-apiVersion : app/v1
+apiVersion : apps/v1
 kind : Deployment
 metadata:
   name : mongodb
@@ -32,9 +32,10 @@ spec:
 ---
 apiVersion : v1
 kind : Service
-namespace : roboshop
+
 metadata:
   name : mongodb
+  namespace : roboshop
   labels:
     project : roboshop
     tier : db
