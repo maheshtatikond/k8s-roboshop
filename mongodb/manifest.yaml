@@ -3,7 +3,6 @@ kind: Deployment
 metadata:
   name: mongodb
   namespace: roboshop
-  # these labels are replicaset labels
   labels:
     project: roboshop
     tier: db
@@ -11,12 +10,10 @@ metadata:
 spec:
   replicas: 1
   selector:
-    # using these labels replica set selects the pod
     matchLabels:
       project: roboshop
       tier: db
       component: mongodb
-  # This is pod definition, pod is subset of replicaset
   template:
     metadata:
       labels:
@@ -24,9 +21,19 @@ spec:
         tier: db
         component: mongodb
     spec:
-    containers:
-      - name: mongodb
-        image: mahesh6419/mongodb:1.0.0
+      containers:
+        - name: mongodb
+          image: mahesh6419/mongodb:1.0.0
+          ports:
+            - containerPort: 27017
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+
 ---
 apiVersion: v1
 kind: Service
@@ -39,11 +46,10 @@ metadata:
     component: mongodb
 spec:
   selector:
-    # labels are used as selectors
     project: roboshop
     tier: db
     component: mongodb
   ports:
-  - protocol: TCP
-    port: 27017 # servie port
-    targetPort: 27017 # container port
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
