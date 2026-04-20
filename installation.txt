@@ -1,0 +1,89 @@
+Install docker first.
+eks - create, update, delete eks cluster
+kubctl - connect with eks cluster
+aws cli - to provide authe while crating cluster, connecting cluster.
+Home location of docker Docker/var/lib/docker 
+While ceating the ec2 instance I have allocated 50GB storage 
+df -hT = to check the file system
+
+we allocated 2 GB to   /dev/mapper/RootVG-varVol    xfs       2.0G  583M  1.4G  30% /var
+
+now we need to claim 50 GB storage 
+To resize disk:
+sudo growpart /dev/nvme0n1 4
+sudo lvextend -L +30G /dev/RootVG/varVol
+sudo xfs_growfs /var
+Now we will see /var got 32 GB
+
+
+
+
+Install below packages to install docker
+sudo dnf -y install dnf-plugins-core
+
+
+ sudo systemctl start docker
+ sudo systemctl enable docker
+ sudo systemctl status docker 
+
+
+sudo usermod -aG docker ec2-user
+check docker ps it should work #here we are adding ec2-user user into docker so next time onwards we no need to use sudo command
+# Need to add, user to the docker group. to get docker command access.
+check version: docker --version
+
+###### Install eksctl.    eksctl is a command-line tool used to create and manage Kubernetes clusters on AWS.
+# for ARM systems, set ARCH to: `arm64`, `armv6` or `armv7`
+ARCH=amd64
+PLATFORM=$(uname -s)_$ARCH
+
+curl -sLO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+
+# (Optional) Verify checksum
+curl -sL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_checksums.txt" | grep $PLATFORM | sha256sum --check
+
+tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+
+sudo install -m 0755 /tmp/eksctl /usr/local/bin && rm /tmp/eksctl
+
+check version eksctl version
+
+##### next install kubectl. kubectl is the command-line tool used to interact with Kubernetes clusters.
+
+curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.35.2/2026-02-27/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+
+check version kubectl version
+
+run aws configure
+
+#### 
+need to create ekscluster 
+make eksctl.yaml(eks.yml) file and push into git
+Now need to create a spot instance.
+then pull into the workstation 
+run  eksctl create cluster --config-file=eks.yaml
+
+now the kubectl cluster has been created....
+
+now create the namespace
+namespace.yaml and push to the git and pull into the cluster and create namespace
+kubectl apply -f namespace.yaml --- name space has been ceated.
+now check the name space "kubectl get name space" now we will see the roboshop name space
+
+now create a monogodb deployment
+kubectl apply -f manifest.yaml 
+kubectl get deployment -n roboshop----- check deployment
+kubctl get rs -n roboshop ---- check replica set
+kubectl get pods -o wide -n roboshop --- check pods
+kubectl get svc -n roboshop --- check service
+kubectl describe svc mongodb -n roboshop----- check pod ip address as endpoint ip address 
+
+
+
+k9s install
+use curl -sS https://webinstall.dev/k9s | bash
+and open separate tab in itermianl and type k9s
+
+kubectl get pods -n roboshop---- it shows the pods running in the namespace
